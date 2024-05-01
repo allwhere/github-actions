@@ -5,7 +5,8 @@ RUN go mod tidy
 RUN CGO_ENABLED=0 GOOS=linux go build -o jira-release-creator .
 
 FROM alpine:3.18
-WORKDIR /root/
+WORKDIR /app
 COPY --from=builder /app/jira-release-creator .
+RUN ls -la
 RUN chmod +x jira-release-creator
 CMD ["./jira-release-creator"]
