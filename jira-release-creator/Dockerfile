@@ -12,6 +12,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o jira-release-creator .
 FROM alpine:3.19
 WORKDIR /root/
 COPY --from=builder /app/jira-release-creator .
+RUN chmod +x jira-release-creator
 
 # Command to run the executable
 CMD ["./jira-release-creator"]
