@@ -18,8 +18,8 @@ func main() {
 	}
 
 	// Inputs from GitHub Actions
-	versionName := os.Getenv("INPUT_VERSION_NAME")
-	projectKey := os.Getenv("INPUT_PROJECT_KEY")
+	versionName := os.Getenv("VERSION_NAME")
+	projectKey := os.Getenv("PROJECT_KEY")
 
 	// Get Project ID from Project Key
 	projectID, err := getProjectID(projectKey)
