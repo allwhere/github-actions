@@ -2,7 +2,7 @@
 FROM golang:1.16-alpine as builder
 
 WORKDIR /app
-COPY go.mod go.sum main.go ./
+COPY go.* main.go ./
 RUN go mod tidy
 
 # Build the application
