@@ -8,5 +8,5 @@ FROM alpine:3.18
 WORKDIR /app
 COPY --from=builder /app/jira-release-creator .
 RUN ls -la
-RUN chmod +x jira-release-creator
-CMD ["./jira-release-creator"]
+RUN chmod +x /app/jira-release-creator
+CMD ["/app/jira-release-creator"]
