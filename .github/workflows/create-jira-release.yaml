@@ -1,12 +1,13 @@
 name: Jira Release Action
 
 on:
-  create:
+  push:
     branches:
-      - 'release/*'
+      - 'release/**'
 
 jobs:
   jira-release:
+    if: github.event.created
     runs-on: ubuntu-latest
     steps:
 
