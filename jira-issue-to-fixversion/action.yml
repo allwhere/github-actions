@@ -20,7 +20,8 @@ runs:
   using: 'docker'
   image: 'Dockerfile'
   env:
-    VERSION_NAME: ${{ inputs.versionName }}
+    PR_TITLE:  ${{ inputs.prTitle }} #${{ github.event.pull_request.title }}
+    FIX_VERSION: ${{ inputs.versionName }}
     PROJECT_KEY: ${{ inputs.projectKey }}
     JIRA_USER: ${{ inputs.jiraUser }}
     JIRA_TOKEN: ${{ inputs.jiraToken }}
