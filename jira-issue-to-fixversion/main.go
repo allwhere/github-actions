@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"regexp"
-	"strings"
 )
 
 var jiraClient *jira.Client
@@ -51,18 +50,17 @@ func setupJiraClient() error {
 	return nil
 }
 
-func extractIssueKeys(prTitle, projectKey string) ([]string, error) {
-	rePattern := fmt.Sprintf(`\[(%s-\d+(?:,%s-\d+)*)\]`, projectKey, projectKey)
+func extractIssueKeys(prTitle string, projectKey string) ([]string, error) {
+	rePattern := fmt.Sprintf(`\[\s*(%s-\d+(?:\s*,\s*%s-\d+)*)\s*\]`, projectKey, projectKey)
 	re := regexp.MustCompile(rePattern)
+
 	matches := re.FindStringSubmatch(prTitle)
 	if len(matches) < 2 {
 		return nil, fmt.Errorf("no issue keys found in PR title")
 	}
 
-	issueKeys := strings.Split(matches[1], ",")
-	for i, key := range issueKeys {
-		issueKeys[i] = strings.TrimSpace(key)
-	}
+	// Split the captured group by commas and trim spaces around issue keys
+	issueKeys := regexp.MustCompile(`\s*,\s*`).Split(matches[1], -1)
 	return issueKeys, nil
 }
 
