@@ -37,8 +37,17 @@ func main() {
 				log.Fatalf("Error creating Jira version: %v", err)
 			}
 
-			fmt.Printf("::set-output name=version-id::%s\n", versionID)
-			fmt.Printf("::set-output name=version-url::%s\n", versionURL)
+			// Open the GitHub environment file
+			envFile, err := os.OpenFile(os.Getenv("GITHUB_ENV"), os.O_APPEND|os.O_WRONLY, 0644)
+			if err != nil {
+				fmt.Printf("Error: %v", err)
+				return
+			}
+			defer envFile.Close()
+
+			// Write the environment variables
+			fmt.Fprintf(envFile, "VERSION_ID=%s\n", versionID)
+			fmt.Fprintf(envFile, "VERSION_URL=%s\n", versionURL)
 		}
 	}
 }
