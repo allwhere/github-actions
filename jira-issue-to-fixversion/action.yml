@@ -2,10 +2,13 @@ name: 'Add issues to fixVersion'
 description: 'Adds issues to version in Jira'
 inputs:
   versionName:
-    description: 'Name of the version to create'
+    description: 'Name of the existing fix version'
     required: true
   projectKey:
     description: 'Jira project key'
+    required: true
+  prTitle:
+    description: 'PR title to extract issue keys from'
     required: true
   jiraUser:
     description: 'Jira user email'
@@ -16,6 +19,7 @@ inputs:
   jiraUrl:
     description: 'Jira instance URL'
     required: true
+
 runs:
   using: 'docker'
   image: 'Dockerfile'
