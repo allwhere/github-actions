@@ -1,0 +1,28 @@
+name: Test Jira Release Action
+
+on:
+  create:
+    branches:
+      - 'release/*'
+
+jobs:
+  test-jira-release:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Extract branch name
+        shell: bash
+        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+        id: extract_branch
+
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Run Jira Release Action
+        uses: allwhere/allwhere-github-actions/jira-release-creator@v1.0-rc
+        with:
+          versionName: ${{ steps.extract_branch.outputs.branch }}
+          projectKey: DEV
+          jiraUser: ${{ secrets.JIRA_AUTOMATION_USER }}
+          jiraToken: ${{ secrets.JIRA_AUTOMATION_TOKEN }}
+          jiraUrl: https://allwhere.atlassian.net
