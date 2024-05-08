@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"regexp"
-	"strings"
 )
 
 var jiraClient *jira.Client
@@ -23,9 +22,10 @@ func main() {
 	fixVersion := os.Getenv("FIX_VERSION")
 
 	// Extract Jira issue keys from PR title
-	issueKeys, err := extractIssueKeys(prTitle, projectKey)
-	if err != nil {
-		log.Fatalf("Error extracting issue keys: %v", err)
+	issueKeys := extractIssueKeys(prTitle, projectKey)
+	if len(issueKeys) == 0 {
+		log.Println("No issue reference found in the PR title")
+		return
 	}
 	fmt.Println("Extracted issue keys:", issueKeys)
 
@@ -51,30 +51,15 @@ func setupJiraClient() error {
 	return nil
 }
 
-func extractIssueKeys(prTitle string, projectKey string) ([]string, error) {
-	rePattern := fmt.Sprintf(`\[\s*(%s-\d+(?:\s*,\s*%s-\d+)*)\s*\]`, projectKey, projectKey)
-	re := regexp.MustCompile(rePattern)
+func extractIssueKeys(prTitle string, projectKey string) []string {
+	reBracket := regexp.MustCompile(`\[(.*?)\]`)
+	bracketContents := reBracket.FindStringSubmatch(prTitle)
 
-	matches := re.FindStringSubmatch(prTitle)
-	if len(matches) < 2 {
-		return nil, fmt.Errorf("no issue keys found in PR title")
+	if len(bracketContents) > 1 {
+		reIssues := regexp.MustCompile(fmt.Sprintf(`%s-\d+`, projectKey))
+		return reIssues.FindAllString(bracketContents[1], -1)
 	}
-
-	issueKeys := regexp.MustCompile(`\s*,\s*`).Split(matches[1], -1)
-
-	var validIssueKeys []string
-	for _, key := range issueKeys {
-		trimmedKey := strings.TrimSpace(key)
-		if trimmedKey != "" {
-			validIssueKeys = append(validIssueKeys, trimmedKey)
-		}
-	}
-
-	if len(validIssueKeys) == 0 {
-		return nil, fmt.Errorf("no valid issue keys extracted from PR title")
-	}
-
-	return validIssueKeys, nil
+	return []string{}
 }
 
 func addIssuesToFixVersion(issueKeys []string, projectKey string, fixVersion string) error {
