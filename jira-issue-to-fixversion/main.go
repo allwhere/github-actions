@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"strings"
 )
 
 var jiraClient *jira.Client
@@ -59,9 +60,21 @@ func extractIssueKeys(prTitle string, projectKey string) ([]string, error) {
 		return nil, fmt.Errorf("no issue keys found in PR title")
 	}
 
-	// Split the captured group by commas and trim spaces around issue keys
 	issueKeys := regexp.MustCompile(`\s*,\s*`).Split(matches[1], -1)
-	return issueKeys, nil
+
+	var validIssueKeys []string
+	for _, key := range issueKeys {
+		trimmedKey := strings.TrimSpace(key)
+		if trimmedKey != "" {
+			validIssueKeys = append(validIssueKeys, trimmedKey)
+		}
+	}
+
+	if len(validIssueKeys) == 0 {
+		return nil, fmt.Errorf("no valid issue keys extracted from PR title")
+	}
+
+	return validIssueKeys, nil
 }
 
 func addIssuesToFixVersion(issueKeys []string, projectKey string, fixVersion string) error {
