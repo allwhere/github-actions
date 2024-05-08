@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run Jira Release Action
-        uses: allwhere/allwhere-github-actions/jira-release-creator@v1.0
+        uses: allwhere/allwhere-github-actions/jira-release-creator@v1.0 # full path to action yaml @ tag version
         with:
           versionName: ${{ env.BRANCH_NAME }}
           projectKey: DEV
