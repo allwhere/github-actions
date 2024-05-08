@@ -50,7 +50,7 @@ func getProjectID(projectKey string) (int, error) {
 	}
 
 	var project struct {
-		ID string `json:"id"` // Assuming the ID is provided as a string in the JSON response
+		ID string `json:"id"`
 	}
 
 	_, err = jiraClient.Do(req, &project)

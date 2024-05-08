@@ -1,0 +1,40 @@
+name: Test Jira Issue Addition to Fix Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      versionName:
+        description: 'Name of the version to add issues to'
+        required: true
+      projectKey:
+        description: 'Jira project key where the version exists'
+        required: true
+      prTitle:
+        description: 'PR title to extract issue keys from'
+        required: true
+      jiraUser:
+        description: 'Jira user email'
+        required: true
+      jiraToken:
+        description: 'Jira API token'
+        required: true
+      jiraUrl:
+        description: 'Jira instance URL'
+        required: true
+
+jobs:
+  test-issue-to-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Run Jira Add Issues to Version Action
+        uses: ./issue-to-fixversion
+        with:
+          versionName: ${{ github.event.inputs.versionName }}
+          projectKey: ${{ github.event.inputs.projectKey }}
+          prTitle: ${{ github.event.inputs.prTitle }}
+          jiraUser: ${{ github.event.inputs.jiraUser }}
+          jiraToken: ${{ github.event.inputs.jiraToken }}
+          jiraUrl: ${{ github.event.inputs.jiraUrl }}
