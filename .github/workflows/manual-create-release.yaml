@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Run Jira Release Action
         uses: allwhere/allwhere-github-actions/jira-release-creator@v1.0-rc #./jira-release-creator # for remote reference (uses: allwhere/allwhere-github-actions/jira-release-creator@v1.0)

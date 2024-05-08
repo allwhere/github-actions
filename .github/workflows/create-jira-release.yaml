@@ -12,16 +12,16 @@ jobs:
 
       - name: Extract branch name
         shell: bash
-        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+        run: echo "BRANCH_NAME=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_ENV
         id: extract_branch
 
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Run Jira Release Action
         uses: allwhere/allwhere-github-actions/jira-release-creator@v1.0-rc
         with:
-          versionName: ${{ steps.extract_branch.outputs.branch }}
+          versionName: ${{ env.BRANCH_NAME }}
           projectKey: DEV
           jiraUser: ${{ secrets.JIRA_AUTOMATION_USER }}
           jiraToken: ${{ secrets.JIRA_AUTOMATION_TOKEN }}
