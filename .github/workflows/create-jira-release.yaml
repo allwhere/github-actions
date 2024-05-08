@@ -1,4 +1,4 @@
-name: Test Jira Release Action
+name: Jira Release Action
 
 on:
   create:
