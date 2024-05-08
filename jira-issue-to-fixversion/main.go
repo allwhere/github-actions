@@ -64,17 +64,25 @@ func extractIssueKeys(prTitle string, projectKey string) []string {
 
 func addIssuesToFixVersion(issueKeys []string, projectKey string, fixVersion string) error {
 	for _, issueKey := range issueKeys {
-		issue, _, err := jiraClient.Issue.Get(issueKey, nil)
-		if err != nil {
-			return fmt.Errorf("failed to retrieve issue %s: %v", issueKey, err)
+		// Create the payload for updating the FixVersions field
+		payload := map[string]interface{}{
+			"update": map[string]interface{}{
+				"fixVersions": []interface{}{
+					map[string]interface{}{"add": map[string]string{"name": fixVersion}},
+				},
+			},
 		}
 
-		fixVersion := jira.FixVersion{Name: fixVersion}
-		issue.Fields.FixVersions = append(issue.Fields.FixVersions, &fixVersion)
+		// Convert map to JSON for the API call
+		issueUpdate := new(jira.Issue)
+		issueUpdate.Fields = &jira.IssueFields{
+			Unknowns: payload,
+		}
 
-		_, _, err = jiraClient.Issue.Update(issue)
+		// Issue.Update expects a string issue key and an issue object structured for update
+		_, _, err := jiraClient.Issue.Update(issueKey, issueUpdate)
 		if err != nil {
-			return fmt.Errorf("failed to update issue %s with fix version %s: %v", issueKey, fixVersion.Name, err)
+			return fmt.Errorf("failed to update issue %s with fix version %s: %v", issueKey, fixVersion, err)
 		}
 	}
 	return nil
