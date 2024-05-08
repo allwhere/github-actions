@@ -27,14 +27,20 @@ func main() {
 		log.Fatalf("Error getting project ID: %v", err)
 	}
 
-	// Create Jira Version using the retrieved Project ID
-	versionID, versionURL, err := createJiraVersion(versionName, projectID)
-	if err != nil {
-		log.Fatalf("Error creating Jira version: %v", err)
-	}
+	if versionExists, err := validateJiraVersion(projectKey, versionName); err == nil {
+		if versionExists {
+			fmt.Printf("The Jira version: %s already exists.", versionName)
+			return
+		} else {
+			versionID, versionURL, err := createJiraVersion(versionName, projectID)
+			if err != nil {
+				log.Fatalf("Error creating Jira version: %v", err)
+			}
 
-	fmt.Printf("::set-output name=version-id::%s\n", versionID)
-	fmt.Printf("::set-output name=version-url::%s\n", versionURL)
+			fmt.Printf("::set-output name=version-id::%s\n", versionID)
+			fmt.Printf("::set-output name=version-url::%s\n", versionURL)
+		}
+	}
 }
 
 func getProjectID(projectKey string) (int, error) {
@@ -72,6 +78,35 @@ func setupJiraClient() error {
 	}
 	jiraClient = client
 	return nil
+}
+
+func getJiraVersions(projectKey string) ([]jira.Version, error) {
+	apiEndpoint := fmt.Sprintf("%s/rest/api/3/project/%s/versions", os.Getenv("JIRA_URL"), projectKey)
+	req, err := jiraClient.NewRequest("GET", apiEndpoint, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %v", err)
+	}
+
+	var versions []jira.Version
+	_, err = jiraClient.Do(req, &versions)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get versions: %v", err)
+	}
+	return versions, nil
+}
+
+func validateJiraVersion(projectKey string, versionName string) (bool, error) {
+	versions, err := getJiraVersions(projectKey)
+	if err != nil {
+		log.Fatal("Jira API error, cannot get versions")
+		return false, err
+	}
+	for _, version := range versions {
+		if version.Name == versionName {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 func createJiraVersion(versionName string, projectID int) (string, string, error) {
