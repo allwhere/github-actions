@@ -9,7 +9,6 @@ import (
 )
 
 var jiraClient *jira.Client
-var jiraBaseUrl string
 
 func main() {
 	// Setup JIRA client
@@ -64,7 +63,8 @@ func main() {
 			}
 			defer summaryFile.Close()
 			// Write GitHub summary
-			fmt.Fprintf(summaryFile, "### The Jira version: %s successfully created :rocket: URL: %s", versionName, versionURL)
+			releaseURL := fmt.Sprintf("%s/projects/%s/versions/%s", os.Getenv("JIRA_URL"), projectKey, versionID)
+			fmt.Fprintf(summaryFile, "### The Jira version: %s successfully created :rocket: URL: %s", versionName, releaseURL)
 		}
 	}
 }
