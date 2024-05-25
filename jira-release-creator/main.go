@@ -29,14 +29,23 @@ func main() {
 
 	if versionExists, err := validateJiraVersion(projectKey, versionName); err == nil {
 		if versionExists {
-			fmt.Printf("The Jira version: %s already exists.", versionName)
+			fmt.Printf("The Jira version: %s already exists.", versionName)			
+			// Open the GitHub summary file
+			summaryFile, err := os.OpenFile(os.Getenv("GITHUB_STEP_SUMMARY"), os.O_APPEND|os.O_WRONLY, 0644)
+			if err != nil {
+				fmt.Printf("Error: %v", err)
+				return
+			}
+			defer summaryFile.Close()
+			// Write Github sumamry
+			fmt.Fprintf(summaryFile, "### The Jira version: %s already exists :white_check_mark:", versionName)			
 			return
 		} else {
 			versionID, versionURL, err := createJiraVersion(versionName, projectID)
 			if err != nil {
 				log.Fatalf("Error creating Jira version: %v", err)
 			}
-
+			fmt.Printf("The Jira version: %s successfully created!", versionName)	
 			// Open the GitHub environment file
 			envFile, err := os.OpenFile(os.Getenv("GITHUB_ENV"), os.O_APPEND|os.O_WRONLY, 0644)
 			if err != nil {
@@ -44,10 +53,18 @@ func main() {
 				return
 			}
 			defer envFile.Close()
-
 			// Write the environment variables
 			fmt.Fprintf(envFile, "VERSION_ID=%s\n", versionID)
-			fmt.Fprintf(envFile, "VERSION_URL=%s\n", versionURL)
+			fmt.Fprintf(envFile, "VERSION_URL=%s\n", versionURL)			
+			// Open the GitHub summary file
+			summaryFile, err := os.OpenFile(os.Getenv("GITHUB_STEP_SUMMARY"), os.O_APPEND|os.O_WRONLY, 0644)
+			if err != nil {
+				fmt.Printf("Error: %v", err)
+				return
+			}
+			defer summaryFile.Close()
+			// Write Github sumamry
+			fmt.Fprintf(summaryFile, "### The Jira version: %s successfully created :rocket: URL: %s", versionName, versionURL)	
 		}
 	}
 }
