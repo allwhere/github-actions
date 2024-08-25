@@ -1,0 +1,47 @@
+name: "Dev CI Backend Common"
+description: "Run tests for a specific component in the backend"
+
+inputs:
+  component:
+    description: "Component name"
+    required: true
+  test-suite:
+    description: "Test suite name"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v4
+
+    - name: Login to DockerHub
+      shell: sh
+      run: echo "${{ env.DOCKERHUB_PASSWORD }}" | docker login -u "${{ env.DOCKERHUB_USERNAME }}" --password-stdin
+
+    - name: Start Docker Containers
+      shell: sh
+      run: ./docker/start.sh -d
+      working-directory: ./services/${{ inputs.component }}
+
+    - name: Running Test Suites
+      shell: sh
+      run: ./docker/exec.sh ${{ inputs.component }} yarn ${{ inputs.test-suite }}
+      working-directory: ./services/${{ inputs.component }}
+
+    - name: Copying Test Results
+      if: ${{ inputs.test-suite != 'lint' }}
+      shell: sh
+      run: |
+        suite_name=$(echo "${{ inputs.test-suite }}" | awk -F: '{print $NF}')
+        file_name="${{ inputs.component }}-${suite_name}-junit"
+        docker cp ${{ inputs.component }}:/usr/src/app/junit.xml /tmp/${file_name}.xml
+        echo "TEST_RESULT_FILE=$file_name" >> $GITHUB_ENV
+        short_sha=$(echo "${{ github.sha }}" | cut -c1-7)
+        echo "SHORT_SHA=$short_sha" >> $GITHUB_ENV
+      working-directory: ./services/${{ inputs.component }}
+
+    - uses: actions/upload-artifact@v4
+      if: ${{ inputs.test-suite != 'lint' }}
+      with:
+        name: ${{ env.TEST_RESULT_FILE }}-${{ env.SHORT_SHA }}-results
+        path: /tmp/${{ env.TEST_RESULT_FILE }}.xml
