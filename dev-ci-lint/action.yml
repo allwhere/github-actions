@@ -17,7 +17,7 @@ runs:
 
     - name: Login to NPM
       shell: sh
-      run: npm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
+      run: npm set //registry.npmjs.org/:_authToken ${{ env.NPM_TOKEN }}
 
     - name: Install dependencies
       shell: sh
