@@ -1,0 +1,28 @@
+name: "Dev CI Lint"
+description: "Run Linting for a specific backend component"
+
+inputs:
+  node-version:
+    description: "Node version to use"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - name: Login to NPM
+      shell: sh
+      run: npm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
+
+    - name: Install dependencies
+      shell: sh
+      run: yarn install
+
+    - name: Running tests
+      shell: sh
+      run: yarn lint
