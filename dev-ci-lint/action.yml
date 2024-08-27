@@ -2,6 +2,9 @@ name: "Dev CI Lint"
 description: "Run Linting for a specific backend component"
 
 inputs:
+  component:
+    description: "Component name"
+    required: true
   node-version:
     description: "Node version to use"
     required: true
@@ -22,7 +25,9 @@ runs:
     - name: Install dependencies
       shell: sh
       run: yarn install
+      working-directory: services/${{ inputs.component }}
 
     - name: Running tests
       shell: sh
       run: yarn lint
+      working-directory: services/${{ inputs.component }}

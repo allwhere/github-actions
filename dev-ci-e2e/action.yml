@@ -21,10 +21,12 @@ runs:
     - name: Start Docker Containers
       shell: sh
       run: ./docker/start.sh -d
+      working-directory: services/${{ inputs.component }}
 
     - name: Running Test Suites
       shell: sh
       run: ./docker/exec.sh ${{ inputs.component }} yarn ${{ inputs.test-suite }}
+      working-directory: services/${{ inputs.component }}
 
     - name: Copying Test Results
       if: ${{ inputs.test-suite != 'lint' }}
@@ -36,6 +38,7 @@ runs:
         echo "TEST_RESULT_FILE=$file_name" >> $GITHUB_ENV
         short_sha=$(echo "${{ github.sha }}" | cut -c1-7)
         echo "SHORT_SHA=$short_sha" >> $GITHUB_ENV
+      working-directory: services/${{ inputs.component }}
 
     - uses: actions/upload-artifact@v4
       if: ${{ inputs.test-suite != 'lint' }}
